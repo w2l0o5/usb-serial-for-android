@@ -12,13 +12,14 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
-public class GsmModemSerialDriver implements UsbSerialDriver{
+public class ChromeCcdSerialDriver implements UsbSerialDriver{
 
-    private final String TAG = GsmModemSerialDriver.class.getSimpleName();
+    private final String TAG = ChromeCcdSerialDriver.class.getSimpleName();
 
     private final UsbDevice mDevice;
-    private final UsbSerialPort mPort;
+    private final List<UsbSerialPort> mPorts;
 
     @Override
     public UsbDevice getDevice() {
@@ -27,26 +28,27 @@ public class GsmModemSerialDriver implements UsbSerialDriver{
 
     @Override
     public List<UsbSerialPort> getPorts() {
-        return Collections.singletonList(mPort);
+        return mPorts;
     }
 
-    public GsmModemSerialDriver(UsbDevice mDevice) {
+    public ChromeCcdSerialDriver(UsbDevice mDevice) {
         this.mDevice = mDevice;
-        mPort = new GsmModemSerialPort(mDevice, 0);
+        mPorts = new ArrayList<UsbSerialPort>();
+        for (int i = 0; i < 3; i++)
+            mPorts.add(new ChromeCcdSerialPort(mDevice, i));
     }
 
-    public class GsmModemSerialPort extends CommonUsbSerialPort {
-
+    public class ChromeCcdSerialPort extends CommonUsbSerialPort {
         private UsbInterface mDataInterface;
 
-        public GsmModemSerialPort(UsbDevice device, int portNumber) {
+        public ChromeCcdSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
         }
 
         @Override
         protected void openInt() throws IOException {
             Log.d(TAG, "claiming interfaces, count=" + mDevice.getInterfaceCount());
-            mDataInterface = mDevice.getInterface(0);
+            mDataInterface = mDevice.getInterface(mPortNumber);
             if (!mConnection.claimInterface(mDataInterface, true)) {
                 throw new IOException("Could not claim shared control/data interface");
             }
@@ -59,7 +61,6 @@ public class GsmModemSerialDriver implements UsbSerialDriver{
                     mWriteEndpoint = ep;
                 }
             }
-            initGsmModem();
         }
 
         @Override
@@ -67,21 +68,11 @@ public class GsmModemSerialDriver implements UsbSerialDriver{
             try {
                 mConnection.releaseInterface(mDataInterface);
             } catch(Exception ignored) {}
-
-        }
-
-        private int initGsmModem() throws IOException {
-            int len = mConnection.controlTransfer(
-                    0x21, 0x22, 0x01, 0, null, 0, 5000);
-            if(len < 0) {
-                throw new IOException("init failed");
-            }
-            return len;
         }
 
         @Override
         public UsbSerialDriver getDriver() {
-            return GsmModemSerialDriver.this;
+            return ChromeCcdSerialDriver.this;
         }
 
         @Override
@@ -97,9 +88,8 @@ public class GsmModemSerialDriver implements UsbSerialDriver{
 
     public static Map<Integer, int[]> getSupportedDevices() {
         final Map<Integer, int[]> supportedDevices = new LinkedHashMap<>();
-        supportedDevices.put(UsbId.VENDOR_UNISOC, new int[]{
-                UsbId.FIBOCOM_L610,
-                UsbId.FIBOCOM_L612,
+        supportedDevices.put(UsbId.VENDOR_GOOGLE, new int[]{
+                UsbId.GOOGLE_CR50,
         });
         return supportedDevices;
     }

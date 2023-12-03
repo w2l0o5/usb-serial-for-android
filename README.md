@@ -37,10 +37,15 @@ dependencyResolutionManagement {
 }
 ```
 
+If using gradle kotlin  use line
+```gradle.kts
+        maven(url = "https://jitpack.io")
+```
+
 Add library to dependencies
 ```gradle
 dependencies {
-    implementation 'com.github.mik3y:usb-serial-for-android:3.6.0'
+    implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
 }
 ```
 
@@ -151,15 +156,18 @@ a compatible UsbDevice.
 This library supports USB to serial converter chips:
 * FTDI FT232R, FT232H, FT2232H, FT4232H, FT230X, FT231X, FT234XD
 * Prolific PL2303
-* Silabs CP2102 and all other CP210x
+* Silabs CP2102, CP210*
 * Qinheng CH340, CH341A, CH9102
-* GsmModem devices, e.g. for Unisoc based Fibocom GSM modems
 
-and devices implementing the CDC/ACM protocol like
+devices implementing the CDC/ACM protocol like
 * Arduino using ATmega32U4
 * Digispark using V-USB software USB
 * BBC micro:bit using ARM mbed DAPLink firmware
 * ...
+
+and some device specific drivers:
+* GsmModem devices, e.g. for Unisoc based Fibocom GSM modems
+* Chrome OS CCD (Closed Case Debugging)
 
 ## Help & Discussion
 
