@@ -50,7 +50,7 @@ project.afterEvaluate {
                 // values used for local maven repo, jitpack uses github release:
                 groupId 'com.github.w2l0o5'
                 artifactId 'usb-serial-for-android'
-                version '3.6.0'
+                version '3.7.0'
             }
         }
     }
